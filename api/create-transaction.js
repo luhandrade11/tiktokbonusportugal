@@ -11,7 +11,14 @@ export default async function handler(req, res) {
   const ACCOUNT_EMAIL = process.env.WAYMB_ACCOUNT_EMAIL
 
   if (!CLIENT_ID || !CLIENT_SECRET || !ACCOUNT_EMAIL) {
-    return res.status(500).json({ error: 'Credenciais WayMB não configuradas no servidor.' })
+    console.error('[create-transaction] ENV VARS em falta:', {
+      WAYMB_CLIENT_ID: !!CLIENT_ID,
+      WAYMB_CLIENT_SECRET: !!CLIENT_SECRET,
+      WAYMB_ACCOUNT_EMAIL: !!ACCOUNT_EMAIL,
+    })
+    return res.status(500).json({
+      error: 'Credenciais WayMB não configuradas. Verifica as variáveis de ambiente no Vercel Dashboard.',
+    })
   }
 
   // ── Status check ──────────────────────────────────────────────────────────
@@ -26,6 +33,7 @@ export default async function handler(req, res) {
         body:    JSON.stringify({ id }),
       })
       const data = await response.json()
+      console.log('[status] WayMB response:', data)
 
       // Map WayMB statuses → frontend expectations
       const statusMap = {
@@ -35,18 +43,15 @@ export default async function handler(req, res) {
       }
       const normalizedStatus = statusMap[data.status] || 'pending'
 
-      return res.status(200).json({
-        ...data,
-        status: normalizedStatus,
-      })
+      return res.status(200).json({ ...data, status: normalizedStatus })
     } catch (err) {
-      console.error('WayMB status error:', err)
+      console.error('[status] WayMB error:', err)
       return res.status(500).json({ error: 'Erro ao consultar status da transação.' })
     }
   }
 
   // ── Create transaction ────────────────────────────────────────────────────
-  const { amount, method, payer, paymentDescription, currency, stage } = req.body
+  const { amount, method, payer, paymentDescription, currency } = req.body
 
   if (!amount || !method || !payer) {
     return res.status(400).json({ error: 'Campos obrigatórios em falta: amount, method, payer' })
@@ -57,10 +62,10 @@ export default async function handler(req, res) {
     : (process.env.BASE_URL || 'https://tiktokbonusportugal.vercel.app')
 
   const payerPayload = {
-    name:     payer.name  || 'Cliente',
-    email:    payer.email || ACCOUNT_EMAIL,  // fallback para evitar rejeição da API
-    phone:    payer.phone || '',
-    document: payer.document || '000000000', // fallback para campo obrigatório
+    name:     payer.name     || 'Cliente',
+    email:    payer.email    || ACCOUNT_EMAIL,
+    phone:    payer.phone    || '',
+    document: payer.document || '000000000',
   }
 
   const body = {
@@ -75,6 +80,13 @@ export default async function handler(req, res) {
     callbackUrl:        `${baseUrl}/api/webhook`,
   }
 
+  console.log('[create-transaction] Sending to WayMB:', {
+    amount: body.amount,
+    method: body.method,
+    payer_name: body.payer.name,
+    payer_phone: body.payer.phone,
+  })
+
   try {
     const response = await fetch('https://api.waymb.com/transactions/create', {
       method:  'POST',
@@ -82,19 +94,19 @@ export default async function handler(req, res) {
       body:    JSON.stringify(body),
     })
     const data = await response.json()
+    console.log('[create-transaction] WayMB response:', data)
 
     if (!response.ok) {
-      console.error('WayMB API error:', data)
+      console.error('[create-transaction] WayMB error:', data)
       return res.status(response.status).json(data)
     }
 
-    // Normalizar resposta → o frontend espera d.id
     return res.status(200).json({
       ...data,
       id: data.transactionID || data.id || null,
     })
   } catch (err) {
-    console.error('WayMB create error:', err)
+    console.error('[create-transaction] Fetch error:', err)
     return res.status(500).json({ error: 'Erro interno ao criar transação.' })
   }
 }
