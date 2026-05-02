@@ -65,7 +65,7 @@ export default async function handler(req, res) {
 
   const baseUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
-    : (process.env.BASE_URL || 'https://acessoantecipadoseguro.vercel.app/')
+    : (process.env.BASE_URL || 'https://acessoantecipadoseguro.vercel.app')
 
   const payload = {
     client_id:          CLIENT_ID,
