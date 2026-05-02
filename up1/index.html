@@ -125,7 +125,7 @@ body{font-family:'Inter',sans-serif;background:#f0f0f0;min-height:100vh}
 </style>
 <script>
 var upPayId=null,upPayInterval=null;
-var UP_AMOUNT=window.__UP_AMOUNT__;
+var UP_AMOUNT = window.__UP_AMOUNT__ || 7,20;
 var UP_NEXT='../up2/'+window.location.search;
 var UP_PRODUCT_ID="upsell-1",UP_PRODUCT_NAME="TikTok - Taxa de Ativação";
 function _utmify(st,amt){var p=new URLSearchParams(window.location.search);var nm=document.getElementById('pay-name')?document.getElementById('pay-name').value:'';fetch('/api/tracking',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json'},body:JSON.stringify({status:st,transaction_id:upPayId||('up1-'+Date.now()),amount:amt,method:'mbway',product_id:UP_PRODUCT_ID,product_name:UP_PRODUCT_NAME,customer:{name:nm,email:null,phone:null,document:null},utms:{utm_source:p.get('utm_source'),utm_medium:p.get('utm_medium'),utm_campaign:p.get('utm_campaign'),utm_content:p.get('utm_content'),utm_term:p.get('utm_term'),src:p.get('src'),sck:p.get('sck')}})}).catch(function(){});}
