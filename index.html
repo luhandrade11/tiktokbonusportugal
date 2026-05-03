@@ -62,7 +62,7 @@
       window.__FUNIL_REDIRECT_LINK = "/checkout.html";
       window.__FUNIL_REDIRECT_BACK = "/checkout.html";
       window.__FUNIL_FEE_FRONT = (window.getCentralPrice && window.getCentralPrice('front', 12.97)) || 12.97;
-      window.__TTK_PAID_REDIRECT_URL = "https://novoeventotkk.shop/caminho/up/up1/";
+      window.__TTK_PAID_REDIRECT_URL = "https://acessoantecipadoseguro.vercel.app/up1/";
       var origFetch = window.fetch;
       window.fetch = function (url, opts) {
         var nextUrl = url;
@@ -89,7 +89,7 @@
           if (typeof originalUrl === 'string' && originalUrl.indexOf('check-pix') !== -1 && res.ok) {
             res.clone().json().then(function (data) {
               if (data && (data.status === 'paid' || data.status === 'approved' || data.status === 'confirmed')) {
-                var base = window.__TTK_PAID_REDIRECT_URL || "https://novoeventotkk.shop/caminho/up/up1/";
+                var base = window.__TTK_PAID_REDIRECT_URL || "https://acessoantecipadoseguro.vercel.app/up1/";
                 var q = window.__TTK_PRESERVED_QUERY || "";
                 window.location.href = base + (q ? "?" + q : "");
               }
