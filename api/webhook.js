@@ -1,26 +1,52 @@
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  // ⚠️ CRÍTICO: O 200 tem de ser enviado IMEDIATAMENTE
+  // A WayMB marca a conta inativa se não receber 200 na hora
+  res.status(200).json({ received: true })
 
-  if (req.method === 'OPTIONS') return res.status(200).end()
-
-  // WayMB exige sempre resposta 200 para confirmar recebimento
-  if (req.method !== 'POST') return res.status(200).end()
-
+  // Só depois processamos — mesmo que crache, o 200 já foi enviado
   try {
-    const { transactionId, id, status, amount, email } = req.body
-    console.log('[webhook] WayMB notification:', {
-      id: transactionId || id,
+    let body = req.body
+    // Parse manual caso Vercel não faça automaticamente
+    if (!body || typeof body === 'string') {
+      try { body = JSON.parse(body || '{}') } catch { body = {} }
+    }
+
+    const {
+      transactionId,
+      id,
       status,
       amount,
+      currency,
       email,
-    })
-    // Aqui podes adicionar lógica extra: guardar no DB, enviar email, etc.
-  } catch (err) {
-    console.error('[webhook] Parse error:', err)
-  }
+      account_email,
+      payer,
+    } = body || {}
 
-  // Sempre retorna 200 conforme documentação WayMB
-  return res.status(200).json({ received: true })
+    const txId = transactionId || id || 'unknown'
+
+    console.log('[webhook] WayMB notification recebida:', {
+      id: txId,
+      status,
+      amount,
+      currency,
+      email: email || account_email,
+    })
+
+    switch (status) {
+      case 'COMPLETED':
+        console.log(`[webhook] ✅ Pagamento CONFIRMADO — ID: ${txId} — Valor: ${amount} ${currency || 'EUR'}`)
+        break
+      case 'DECLINED':
+        console.log(`[webhook] ❌ Pagamento RECUSADO — ID: ${txId}`)
+        break
+      case 'PENDING':
+        console.log(`[webhook] ⏳ Pagamento PENDENTE — ID: ${txId}`)
+        break
+      default:
+        console.log(`[webhook] Status desconhecido: ${status} — ID: ${txId}`)
+    }
+  } catch (err) {
+    // Nunca deixar o erro chegar ao cliente — o 200 já foi enviado
+    console.error('[webhook] Erro ao processar (não afeta o 200):', err)
+  }
 }

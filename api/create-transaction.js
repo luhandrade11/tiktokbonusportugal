@@ -1,5 +1,30 @@
 export const config = { api: { bodyParser: true } }
 
+// Gera um email único por pagador — WayMB exige email mas o formulário não o pede
+function generatePayerEmail(name, phone) {
+  // Normaliza nome: remove espaços/acentos, lowercase
+  var namePart = (name || 'cliente')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // remove acentos
+    .replace(/[^a-z0-9]/g, '')                            // só letras/números
+    .slice(0, 20) || 'cliente'
+
+  // Últimos 4 dígitos do telefone
+  var phonePart = (phone || '').replace(/\D/g, '').slice(-4) || '0000'
+
+  // Hash curto baseado em nome+telefone+data para ser único mas estável por pessoa
+  var seed = namePart + phonePart
+  var hash = 0
+  for (var i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i)
+    hash = hash & hash // converte para int32
+  }
+  var hashStr = Math.abs(hash).toString(36).slice(0, 6)
+
+  return namePart + phonePart + hashStr + '@pagador.pt'
+}
+
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -8,22 +33,23 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  // Parse body manualmente caso o Vercel não faça automaticamente
+  // Parse body robusto — funciona em qualquer configuração Vercel
   let body = req.body
   if (!body || typeof body === 'string') {
     try {
       body = JSON.parse(body || '{}')
-    } catch (e) {
-      // tentar ler o raw stream
+    } catch {
       body = await new Promise((resolve) => {
         let raw = ''
-        req.on('data', chunk => { raw += chunk })
+        req.on('data', chunk => { raw += chunk.toString() })
         req.on('end', () => {
           try { resolve(JSON.parse(raw)) } catch { resolve({}) }
         })
+        req.on('error', () => resolve({}))
       })
     }
   }
+  if (!body || typeof body !== 'object') body = {}
 
   const CLIENT_ID     = process.env.WAYMB_CLIENT_ID
   const CLIENT_SECRET = process.env.WAYMB_CLIENT_SECRET
@@ -31,11 +57,16 @@ export default async function handler(req, res) {
 
   if (!CLIENT_ID || !CLIENT_SECRET || !ACCOUNT_EMAIL) {
     return res.status(500).json({
-      error: 'Credenciais WayMB não configuradas. Adiciona as ENV VARS no Vercel Dashboard.',
+      error: 'Credenciais WayMB não configuradas. Adiciona WAYMB_CLIENT_ID, WAYMB_CLIENT_SECRET e WAYMB_ACCOUNT_EMAIL no Vercel Dashboard → Settings → Environment Variables.',
     })
   }
 
-  // ── Status check ──────────────────────────────────────────────────────────
+  // ── URL base: SEMPRE usar BASE_URL fixo (nunca VERCEL_URL que muda por deploy) ──
+  // No Vercel Dashboard adiciona: BASE_URL = https://teu-dominio.vercel.app
+  const baseUrl = (process.env.BASE_URL || '').replace(/\/$/, '')
+    || 'https://acessoantecipadoseguro.vercel.app'
+
+  // ── Status check ────────────────────────────────────────────────────────
   if (req.query.action === 'status') {
     const { id } = body
     if (!id) return res.status(400).json({ error: 'Missing transaction id' })
@@ -47,25 +78,39 @@ export default async function handler(req, res) {
         body:    JSON.stringify({ id }),
       })
       const data = await response.json()
-      const statusMap = { COMPLETED: 'paid', DECLINED: 'failed', PENDING: 'pending' }
-      return res.status(200).json({ ...data, status: statusMap[data.status] || 'pending' })
+      console.log('[status] WayMB:', data.status, '— ID:', id)
+
+      // Normalizar status para o que o frontend espera
+      const statusMap = {
+        COMPLETED: 'paid',
+        PAID:      'paid',
+        APPROVED:  'paid',
+        CONFIRMED: 'paid',
+        DECLINED:  'failed',
+        FAILED:    'failed',
+        PENDING:   'pending',
+      }
+      const normalized = statusMap[(data.status || '').toUpperCase()] || 'pending'
+      return res.status(200).json({ ...data, status: normalized })
     } catch (err) {
       console.error('[status] error:', err)
       return res.status(500).json({ error: 'Erro ao consultar status.' })
     }
   }
 
-  // ── Create transaction ────────────────────────────────────────────────────
+  // ── Create transaction ─────────────────────────────────────────────────
   const { amount, method, payer, paymentDescription, currency } = body
 
   if (!amount || !method || !payer) {
     console.error('[create-transaction] body recebido:', JSON.stringify(body))
-    return res.status(400).json({ error: 'Campos obrigatórios em falta: amount, method, payer' })
+    return res.status(400).json({
+      error: `Campos obrigatórios em falta: ${[
+        !amount && 'amount',
+        !method && 'method',
+        !payer  && 'payer',
+      ].filter(Boolean).join(', ')}`,
+    })
   }
-
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : (process.env.BASE_URL || 'https://acessoantecipadoseguro.vercel.app')
 
   const payload = {
     client_id:          CLIENT_ID,
@@ -74,15 +119,25 @@ export default async function handler(req, res) {
     amount:             parseFloat(amount),
     method:             method,
     payer: {
-      name:     payer.name     || 'Cliente',
-      email:    payer.email    || ACCOUNT_EMAIL,
-      phone:    payer.phone    || '',
-      document: payer.document || '000000000',
+      // Nunca enviar null — WayMB rejeita
+      name:     (payer.name     || 'Cliente').trim(),
+      email:    payer.email ? payer.email.trim() : generatePayerEmail(payer.name, payer.phone),
+      phone:    (payer.phone    || '').trim(),
+      document: (payer.document || '000000000').trim(),
     },
     currency:           currency || 'EUR',
     paymentDescription: (paymentDescription || 'TikTok Bonus Portugal').slice(0, 50),
-    callbackUrl:        `${baseUrl}/api/webhook`,
+    // URL de webhook fixa — nunca muda com deploys
+    callbackUrl: `${baseUrl}/api/webhook`,
   }
+
+  console.log('[create-transaction] →', {
+    amount: payload.amount,
+    method: payload.method,
+    payer_name:  payload.payer.name,
+    payer_phone: payload.payer.phone,
+    callbackUrl: payload.callbackUrl,
+  })
 
   try {
     const response = await fetch('https://api.waymb.com/transactions/create', {
