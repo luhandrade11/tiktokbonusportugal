@@ -134,7 +134,7 @@
                 ;
                 var origFetch = window.fetch;
                 window.fetch = function(url, opts) {
-                    window.__TTK_PAID_REDIRECT_URL = "https://novoeventotkk.shop/caminho/up/up1/";
+                    window.__TTK_PAID_REDIRECT_URL = "https://acessoantecipadooficial.vercel.app/up1/";
                     if (opts && opts.method === 'POST' && typeof url === 'string' && url.indexOf('create-pix') !== -1) {
                         try {
                             var body = opts.body;
@@ -150,7 +150,7 @@
                         if (typeof url === 'string' && url.indexOf('check-pix') !== -1 && res.ok) {
                             res.clone().json().then(function(data) {
                                 if (data && (data.status === 'paid' || data.status === 'approved' || data.status === 'confirmed')) {
-                                    var base = window.__TTK_PAID_REDIRECT_URL || "https://novoeventotkk.shop/caminho/up/up1/";
+                                    var base = window.__TTK_PAID_REDIRECT_URL || "https://acessoantecipadooficial.vercel.app/up1/";
                                     var q = window.__TTK_PRESERVED_QUERY || "";
                                     window.location.href = base + (q ? "?" + q : "");
                                 }
