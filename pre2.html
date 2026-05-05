@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carregando Portugal</title>
+    <title>A carregar...</title>
     <style>
-        /* Reset básico e centralização */
+        /* Estilo Clean Minimalista */
         body, html {
             margin: 0;
             padding: 0;
@@ -14,95 +14,69 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #f4f4f4;
-            font-family: Arial, sans-serif;
+            background-color: #ffffff; /* Fundo Branco Puro */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
         }
 
-        /* Container da tela de carregamento */
-        .loader-container {
-            text-align: center;
+        .loader-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* O círculo de carregamento */
-        .loader {
-            width: 80px;
-            height: 80px;
-            border: 8px solid #ccc;
-            border-top: 8px solid #006600; /* Verde de Portugal */
-            border-bottom: 8px solid #FF0000; /* Vermelho de Portugal */
+        /* Spinner Gradiente Rosa TikTok */
+        .spinner {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            display: inline-block;
-            animation: spin 1.5s linear infinite;
-            position: relative;
+            /* Gradiente apenas em tons de rosa */
+            background: conic-gradient(from 0deg, transparent 30%, #fe2c55); 
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #fff 0);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #fff 0);
+            animation: rotate 1s infinite linear;
         }
 
-        /* Detalhe central (Esfera Armilar / Amarelo) */
-        .loader::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            background-color: #FFD700; /* Dourado/Amarelo */
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        /* Texto Discreto */
+        .loading-text {
+            margin-top: 15px;
+            color: #121212;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
         }
 
-        /* Animação de rotação */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
+        @keyframes rotate {
             100% { transform: rotate(360deg); }
         }
 
-        /* Texto de carregamento */
-        .loading-text {
-            margin-top: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+        /* Suavidade na entrada da tela */
+        .loader-wrapper {
+            animation: fadeIn 0.4s ease-in;
         }
 
-        /* Efeito de "pulo" nas letras */
-        .loading-text span {
-            display: inline-block;
-            animation: bounce 0.6s infinite alternate;
-        }
-
-        .loading-text span:nth-child(2) { animation-delay: 0.1s; }
-        .loading-text span:nth-child(3) { animation-delay: 0.2s; }
-
-        @keyframes bounce {
-            to { transform: translateY(-5px); }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-    <div class="loader-container">
-        <!-- Círculo Animado -->
-        <div class="loader"></div>
-        
-        <!-- Texto Animado -->
-        <div class="loading-text">
-            Carregando<span>.</span><span>.</span><span>.</span>
-        </div>
+    <div class="loader-wrapper">
+        <div class="spinner"></div>
+        <div class="loading-text">A preparar o acesso...</div>
     </div>
 
     <script>
-        // Aguarda 2 segundos (2000 milisegundos)
+        // Redirecionamento após 2 segundos
         setTimeout(function() {
-            // Captura os parâmetros da URL atual (ex: ?ttclid=123&utm_source=tiktok)
-            const queryString = window.location.search;
+            // Captura todos os parâmetros da URL (ttclid, ad_id, etc)
+            const currentParams = window.location.search;
+            const targetUrl = "https://acessoantecipadooficial.vercel.app/";
             
-            // Define o link de destino
-            const destino = "https://acessoantecipadoseguro.vercel.app/";
-            
-            // Redireciona concatenando os parâmetros originais
-            window.location.href = destino + queryString;
+            // Redireciona com os parâmetros
+            window.location.href = targetUrl + currentParams;
         }, 2000);
     </script>
 
