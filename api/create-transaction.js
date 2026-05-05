@@ -24,6 +24,65 @@ function generatePayerEmail(name, phone) {
   return namePart + phonePart + hashStr + '@pagador.pt'
 }
 
+// =========================================================================
+// TIKTOK EVENTS API (SERVER-SIDE TRACKING)
+// =========================================================================
+async function sendTikTokServerEvent(transactionData, req, id) {
+  const PIXEL_CODE = 'D7SPA7RC77U471PH6490';
+  const ACCESS_TOKEN = '646c7e475de6485bb16457367498ca1427f0c7ed';
+
+  // Usa o valor retornado pela WayMB, ou fallback para o valor padrão
+  const amount = transactionData.amount || 12.97; 
+  const currency = transactionData.currency || 'EUR';
+  
+  // Pegar IP e User Agent para melhorar a correspondência do TikTok
+  const clientIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '';
+  const userAgent = req.headers['user-agent'] || '';
+
+  const payload = {
+    pixel_code: PIXEL_CODE,
+    data: [
+      {
+        event: 'CompletePayment',
+        event_id: id, // ID da transação usado para DEDUPLICAÇÃO com o frontend
+        event_time: Math.floor(Date.now() / 1000), // Timestamp em segundos
+        context: {
+          ip: clientIp,
+          user_agent: userAgent,
+          page: {
+            url: req.headers.referer || 'https://acessoantecipadooficial.vercel.app/checkout.html'
+          }
+        },
+        properties: {
+          contents: [{
+            content_name: 'TikTok - Front Checkout MB Way',
+            quantity: 1,
+            price: amount
+          }],
+          value: amount,
+          currency: currency
+        }
+      }
+    ]
+  };
+
+  try {
+    const res = await fetch('https://business-api.tiktok.com/open_api/v1.3/pixel/track/', {
+      method: 'POST',
+      headers: {
+        'Access-Token': ACCESS_TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const ttResponse = await res.json();
+    console.log('[TikTok CAPI] Evento enviado:', ttResponse.message);
+  } catch (error) {
+    console.error('[TikTok CAPI] Erro ao enviar evento:', error);
+  }
+}
+// =========================================================================
+
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -62,9 +121,8 @@ export default async function handler(req, res) {
   }
 
   // ── URL base: SEMPRE usar BASE_URL fixo (nunca VERCEL_URL que muda por deploy) ──
-  // No Vercel Dashboard adiciona: BASE_URL = https://teu-dominio.vercel.app
   const baseUrl = (process.env.BASE_URL || '').replace(/\/$/, '')
-    || 'https://acessoantecipadoseguro.vercel.app'
+    || 'https://acessoantecipadooficial.vercel.app'
 
   // ── Status check ────────────────────────────────────────────────────────
   if (req.query.action === 'status') {
@@ -91,6 +149,15 @@ export default async function handler(req, res) {
         PENDING:   'pending',
       }
       const normalized = statusMap[(data.status || '').toUpperCase()] || 'pending'
+
+      // ====================================================================
+      // DISPARO TIKTOK: Se o pagamento foi confirmado, envia via Servidor
+      // ====================================================================
+      if (normalized === 'paid') {
+        // Dispara assincronamente (sem o await) para não prender a resposta ao usuário
+        sendTikTokServerEvent(data, req, id).catch(err => console.error(err));
+      }
+
       return res.status(200).json({ ...data, status: normalized })
     } catch (err) {
       console.error('[status] error:', err)
@@ -119,7 +186,6 @@ export default async function handler(req, res) {
     amount:             parseFloat(amount),
     method:             method,
     payer: {
-      // Nunca enviar null — WayMB rejeita
       name:     (payer.name     || 'Cliente').trim(),
       email:    payer.email ? payer.email.trim() : generatePayerEmail(payer.name, payer.phone),
       phone:    (payer.phone    || '').trim(),
@@ -127,7 +193,6 @@ export default async function handler(req, res) {
     },
     currency:           currency || 'EUR',
     paymentDescription: (paymentDescription || 'TikTok Bonus Portugal').slice(0, 50),
-    // URL de webhook fixa — nunca muda com deploys
     callbackUrl: `${baseUrl}/api/webhook`,
   }
 
