@@ -9,6 +9,18 @@
   <title>Checkout</title>
   <script src="js/central.js"></script>
   <script src="https://cdn.tailwindcss.com/"></script>
+
+  <!-- TikTok Pixel Base Code -->
+  <script>
+    !function (w, d, t) {
+      w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=i+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
+
+      ttq.load('D7SPA7RC77U471PH6490');
+      ttq.page();
+    }(window, document, 'ttq');
+  </script>
+  <!-- End TikTok Pixel Base Code -->
+
   <style>
     body { font-family: Inter, Arial, sans-serif; background: #fff; color: #161823; margin: 0; }
     .topbar { background:#000;color:#fff;text-align:center;padding:8px 12px;font-size:12px;font-weight:700;text-transform:uppercase; }
@@ -168,15 +180,33 @@
         .then(function(st){
           pollAttempts += 1;
           pollErrorStreak = 0;
+          
           if (st.status === 'paid') {
             clearInterval(upPayInterval);
             _utmify('paid', amount);
+
+            // TIKTOK PIXEL: Disparo de Compra Confirmada
+            if (window.ttq) {
+              ttq.track('CompletePayment', {
+                value: amount,
+                currency: 'EUR',
+                contents: [{
+                  content_name: 'TikTok - Front Checkout MB Way',
+                  quantity: 1,
+                  price: amount
+                }]
+              });
+            }
+
             var q = location.search || '';
             var target = redirects || '/up1';
             if (q) target += (target.indexOf('?') === -1 ? q : '&' + q.slice(1));
-            setTimeout(function(){ location.href = target; }, 450);
+            
+            // Aumentado para 800ms para garantir que o pixel dispare antes de redirecionar
+            setTimeout(function(){ location.href = target; }, 800); 
             return;
           }
+          
           if (st.status === 'failed') {
             clearInterval(upPayInterval);
             upPayInterval = null;
@@ -278,6 +308,4 @@
     })();
   </script>
 </body>
-
-<!-- Mirrored from tiktokportugal.vercel.app/checkout.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 02 May 2026 02:04:48 GMT -->
 </html>
